@@ -1,0 +1,32 @@
+# STM32CubeIDE Generated Files
+Debug/
+Release/
+.settings/
+.mxproject
+*.launch
+*.ioc.bak
+build/
+bin/
+
+# Compiled Object files
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+*.d
+*.su
+*.list
+*.lck
+
+# OS Junk
+.DS_Store
+Thumbs.db
+
+
+.lock
+*.launch
+*.bak
+*.tmp
+*.ioc.bak
+

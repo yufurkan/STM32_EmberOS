@@ -13,8 +13,9 @@
 extern "C" {
 #endif
 
-// C tarafından çağrılacak ana fonksiyon
-void App_Main_Start(void);
+
+void App_Main_Start(void);// ana fonksiyon
+void App_Sensor_Task(void);
 
 #ifdef __cplusplus
 }

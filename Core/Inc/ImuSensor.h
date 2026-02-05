@@ -15,8 +15,12 @@ struct MPU_DATA{
 	float AccX;
 	float AccY;
 	float AccZ;
+	float gyX;
+	float gyY;
+	float gyZ;
 	float totalforce;
 };
+
 
 class ImuSensor {
 public:
@@ -33,6 +37,7 @@ private:
 	MPU_DATA mpu_data;
 	I2C_HandleTypeDef* _i2c;
 	HAL_StatusTypeDef mpu_status;
+
 
 };
 

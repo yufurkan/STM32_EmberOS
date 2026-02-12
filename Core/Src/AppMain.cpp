@@ -47,17 +47,17 @@ if(!scan){
 }
 
     led1.toggle();
-    osDelay(150);
     mpu_6050.readAccel();
     mpu_6050.readGyro();
 
+    mpu_6050.angleMeasurement();
 
     MPU_DATA data = mpu_6050.getData();
 
+    //this messages keeps processor bussy a lot . These are cancelled.
+    //printf("X: %.2f | Y: %.2f | Z: %.2f | Total: %.2f\r\n",data.AccX, data.AccY, data.AccZ, data.totalforce);
+    //printf("Gyro: X:%.1f Y:%.1f Z:%.1f\r\n",data.gyX, data.gyY, data.gyZ);
 
-    printf("X: %.2f | Y: %.2f | Z: %.2f | Total: %.2f\r\n",
-           data.AccX, data.AccY, data.AccZ, data.totalforce);
-
-    printf("Gyro: X:%.1f Y:%.1f Z:%.1f\r\n",
-           data.gyX, data.gyY, data.gyZ);
+    //For now Im using a plain printf with a standard UART baud rate of 115200. It keeps the processor busy for about 2.5ms per message. With an osdelay of 4ms, there's still enough time for processing. Im skipping DMA usage for now I'll come back to work on it.
+    printf("Pitch: %.2f | Roll: %.2f\r\n", data.pitch, data.roll);
 }

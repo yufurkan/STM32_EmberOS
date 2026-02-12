@@ -18,22 +18,52 @@
 ImuSensor::ImuSensor(I2C_HandleTypeDef *hi2c) {
 	// TODO Auto-generated constructor stub
 	_i2c=hi2c;
+	_alpha=0.96;
+
+
+	// this funcs here becouse If I want to restart the sensor I m planning use init()
+	_compAngle=0;
+	_prevTime=HAL_GetTick();
+
+	mpu_data.roll = 0.0f;
+	mpu_data.pitch = 0.0f;
 }
 
 bool ImuSensor::init() {
-	uint8_t uyandirici = 0;
+	uint8_t data = 0;
 
 
-	mpu_status=HAL_I2C_Mem_Write(_i2c,MPU6050_ADDR,PWR_MGMT_1_REG,1, &uyandirici,1,100);
+	mpu_status=HAL_I2C_Mem_Write(_i2c,MPU6050_ADDR,PWR_MGMT_1_REG,1, &data,1,100);
 
 	if(mpu_status != HAL_OK)return 0;
 
-	uyandirici = 0x02;
-	mpu_status = HAL_I2C_Mem_Write(_i2c, MPU6050_ADDR, INT_PIN_CFG, 1, &uyandirici, 1, 100);
+	data = 0x02;
+	mpu_status = HAL_I2C_Mem_Write(_i2c, MPU6050_ADDR, INT_PIN_CFG, 1, &data, 1, 100);
 	if(mpu_status == HAL_OK)return 1;
 	return 0;
 }
 
+void ImuSensor::angleMeasurement(){
+
+
+	_dt=(HAL_GetTick()-_prevTime)/1000.0;
+
+	//for first time
+	if (_dt > 0.1f) {
+		_prevTime = HAL_GetTick();
+		_dt = 0;
+		return;
+	}
+
+	float AccRoll = atan2( mpu_data.AccY, mpu_data.AccZ) * 57.296;
+	float AccPitch= atan2(-mpu_data.AccX, mpu_data.AccZ) * 57.296;
+
+	mpu_data.roll = _alpha * (mpu_data.roll + mpu_data.gyX * _dt) + (1.0f - _alpha) * AccRoll;
+	mpu_data.pitch= _alpha * (mpu_data.pitch+ mpu_data.gyY * _dt) + (1.0f - _alpha) * AccPitch;
+
+
+	_prevTime=HAL_GetTick();
+}
 
 
 void ImuSensor::readAccel(){
@@ -55,7 +85,11 @@ void ImuSensor::readAccel(){
 }
 
 MPU_DATA ImuSensor::getData() {
+
+
+
     return mpu_data;
+
 }
 
 void ImuSensor::readGyro(){

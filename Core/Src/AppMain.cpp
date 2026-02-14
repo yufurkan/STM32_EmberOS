@@ -12,12 +12,30 @@
 #include "StatusLed.h"
 #include "ImuSensor.h"
 #include "i2c_scanner.h"
+#include "Pid.h"
 
 extern I2C_HandleTypeDef hi2c1;// for line of ImuSensor mpu_6050(&hi2c1);
 extern UART_HandleTypeDef huart2;
 
 StatusLed led1(LD2_GPIO_Port, LD2_Pin);
 ImuSensor mpu_6050(&hi2c1);
+
+
+Pid pid_roll(1.5f, 0.01f, 0.5f, -20.0f, 20.0f);
+Pid pid_pitch(1.8f, 0.02f, 0.6f, -20.0f, 20.0f);
+
+
+// To avoid confusing the main.c file, I won't create it from the interface. Instead, the definition will be made here. If an interrupt occurs while the control data is being written and the PID controller reads half correct and half incorrect data, a dangerous maneuver may begin in the air.
+static osMutexId_t sysStateMutexHandle;
+
+// 2. Mutex Ayarları (İsim vermek debug yaparken işe yarar)
+static const osMutexAttr_t sysStateMutex_attributes = {
+  .name = "sysStateMutex"
+};
+
+static SystemState_t _sysState = {0};
+
+
 
 void App_Main_Start(void)
 {

@@ -453,7 +453,7 @@ void StartSensorTask(void *argument)
   for(;;)
   {
 	  App_Sensor_Task();
-	  osDelay(10);
+	  osDelay(4);// I decided to 250hz
   }
   /* USER CODE END StartSensorTask */
 }

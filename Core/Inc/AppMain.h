@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-
+void App_Led_Task(void);
 void App_Main_Start(void);// ana fonksiyon
 void App_Sensor_Task(void);
 

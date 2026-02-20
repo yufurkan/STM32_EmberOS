@@ -432,8 +432,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-
-	  osDelay(1000);
+	  App_Led_Task();
+	  osDelay(100);
 
   }
   /* USER CODE END 5 */

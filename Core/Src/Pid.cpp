@@ -11,7 +11,7 @@ Pid::Pid(float kp, float ki, float kd, float minOut, float maxOut) {
     reset();
 }
 
-// Katsayıları Güncelleme (Hız değişince burayı çağıracağız)
+// Updating Coefficients
 void Pid::setTunings(float kp, float ki, float kd) {
     if (kp < 0 || ki < 0 || kd < 0) return; // Negatif katsayı olmaz
     _kp = kp;

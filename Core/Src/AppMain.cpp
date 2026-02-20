@@ -13,6 +13,7 @@
 #include "ImuSensor.h"
 #include "i2c_scanner.h"
 #include "Pid.h"
+#include "SystemManager.h"
 
 extern I2C_HandleTypeDef hi2c1;// for line of ImuSensor mpu_6050(&hi2c1);
 extern UART_HandleTypeDef huart2;
@@ -24,17 +25,7 @@ ImuSensor mpu_6050(&hi2c1);
 Pid pid_roll(1.5f, 0.01f, 0.5f, -20.0f, 20.0f);
 Pid pid_pitch(1.8f, 0.02f, 0.6f, -20.0f, 20.0f);
 
-
-// To avoid confusing the main.c file, I won't create it from the interface. Instead, the definition will be made here. If an interrupt occurs while the control data is being written and the PID controller reads half correct and half incorrect data, a dangerous maneuver may begin in the air.
-static osMutexId_t sysStateMutexHandle;
-
-// 2. Mutex Ayarları (İsim vermek debug yaparken işe yarar)
-static const osMutexAttr_t sysStateMutex_attributes = {
-  .name = "sysStateMutex"
-};
-
-static SystemState_t _sysState = {0};
-
+RCState currentState;
 
 
 void App_Main_Start(void)
@@ -43,12 +34,32 @@ void App_Main_Start(void)
 }
 
 
+
+void App_Led_Task(void)
+{
+	led1.toggle();
+}
+
 void App_Sensor_Task(void)
 {
+
+//Im gonna seprate this part another function and call in main.c befere for loop include scan control--------------
 static bool scan=false;
 static bool isInitialized = false;
 
     if (!isInitialized) {
+    	System_Init();
+
+    	//I will transfer into fuct later----
+    	RCState dummyCommand;
+		dummyCommand.roll = 0.0f;
+		dummyCommand.yaw = 0.0f;
+		dummyCommand.pitch = 0.0f;
+		dummyCommand.throttle = 0.0f;
+		dummyCommand.armed = true;
+    	System_SetRCCommands(dummyCommand);
+		//------------------------------------
+
         if(mpu_6050.init()) {
             printf("MPU6050 OK! Veri akisi basliyor...\r\n");
             isInitialized = true;
@@ -58,24 +69,34 @@ static bool isInitialized = false;
             return;        // Fonksiyondan çık
         }
     }
-
+//---------------------------
 if(!scan){
 	scan=true;
 	I2C_Scanner_Baslat(&hi2c1, &huart2, (char*)"I2C1 HATTI");
 }
 
-    led1.toggle();
+
     mpu_6050.readAccel();
     mpu_6050.readGyro();
-
     mpu_6050.angleMeasurement();
-
     MPU_DATA data = mpu_6050.getData();
+
+    currentState=System_GetState();
+
+
+    float servo_roll_out=pid_roll.compute(currentState.roll, data.roll, 0.004f); //osDelay(4)->0.004f
+    float servo_pitch_out= pid_pitch.compute(currentState.pitch, data.pitch, 0.004f);
+
+
 
     //this messages keeps processor bussy a lot . These are cancelled.
     //printf("X: %.2f | Y: %.2f | Z: %.2f | Total: %.2f\r\n",data.AccX, data.AccY, data.AccZ, data.totalforce);
     //printf("Gyro: X:%.1f Y:%.1f Z:%.1f\r\n",data.gyX, data.gyY, data.gyZ);
 
     //For now Im using a plain printf with a standard UART baud rate of 115200. It keeps the processor busy for about 2.5ms per message. With an osdelay of 4ms, there's still enough time for processing. Im skipping DMA usage for now I'll come back to work on it.
-    printf("Pitch: %.2f | Roll: %.2f\r\n", data.pitch, data.roll);
+    printf("R:%.1f -> PID:%.1f | P:%.1f -> PID:%.1f\r\n",
+                   data.roll, servo_roll_out,
+                   data.pitch, servo_pitch_out);
+
+
 }

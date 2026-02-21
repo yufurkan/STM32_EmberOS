@@ -432,8 +432,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-
-	  osDelay(1000);
+	  App_Led_Task();
+	  osDelay(100);
 
   }
   /* USER CODE END 5 */
@@ -453,7 +453,7 @@ void StartSensorTask(void *argument)
   for(;;)
   {
 	  App_Sensor_Task();
-	  osDelay(10);
+	  osDelay(4);// I decided to 250hz
   }
   /* USER CODE END StartSensorTask */
 }

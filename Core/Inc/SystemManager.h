@@ -10,7 +10,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
+struct PIDOuts {
+    float servo_roll_out;
+    float servo_pitch_out;
+    float servo_yaw_out;
+    float motor_out;
+};
 
 struct RCState{
 	float pitch;

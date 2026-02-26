@@ -107,10 +107,10 @@ if(!scan){
 
     //For now Im using a plain printf with a standard UART baud rate of 115200. It keeps the processor busy for about 2.5ms per message. With an osdelay of 4ms, there's still enough time for processing. Im skipping DMA usage for now I'll come back to work on it.
     printf("AIL1:%u | AIL2:%u | ELEV:%u | MOT:%u\r\n",
-               pwm_ciktilari.aileron1_pwm,
-               pwm_ciktilari.aileron2_pwm,
-               pwm_ciktilari.elevator_pwm,
-               pwm_ciktilari.motor_pwm);
+    		pwm_outputs.aileron1_pwm,
+			pwm_outputs.aileron2_pwm,
+			pwm_outputs.elevator_pwm,
+			pwm_outputs.motor_pwm);
 
 
 }

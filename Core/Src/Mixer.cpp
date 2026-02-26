@@ -39,6 +39,8 @@ void ActuatorMixer::compute( RCState infos, PIDOuts pid_infos){
 		_pwmOutputs.aileron2_pwm = mapToPWM(-pid_infos.servo_roll_out, _minpid_servo, _maxpid_servo, 1000, 2000); // reverse
 		_pwmOutputs.elevator_pwm = mapToPWM(pid_infos.servo_pitch_out, _minpid_servo, _maxpid_servo, 1000, 2000);
 		_pwmOutputs.rudder_pwm   = mapToPWM(pid_infos.servo_yaw_out, _minpid_servo, _maxpid_servo, 1000, 2000);
+
+		_pwmOutputs.motor_pwm = mapToPWM(infos.throttle, _minpid_motor, _maxpid_motor, 1000, 2000);
 	}else {
         // disarmed state
         _pwmOutputs.aileron1_pwm = 1500; // center

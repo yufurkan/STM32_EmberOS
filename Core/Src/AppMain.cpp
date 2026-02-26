@@ -14,6 +14,7 @@
 #include "i2c_scanner.h"
 #include "Pid.h"
 #include "SystemManager.h"
+#include "Mixer.h"
 
 extern I2C_HandleTypeDef hi2c1;// for line of ImuSensor mpu_6050(&hi2c1);
 extern UART_HandleTypeDef huart2;
@@ -21,12 +22,20 @@ extern UART_HandleTypeDef huart2;
 StatusLed led1(LD2_GPIO_Port, LD2_Pin);
 ImuSensor mpu_6050(&hi2c1);
 
+float servo_minout= -20.0f;
+float servo_maxout=  20.0f;
 
-Pid pid_roll(1.5f, 0.01f, 0.5f, -20.0f, 20.0f);
-Pid pid_pitch(1.8f, 0.02f, 0.6f, -20.0f, 20.0f);
+//FİXED _______(I will return here DANGER)-----
+float motor_minout= 0.0f;
+float motor_maxout= 100.0f;
+//FİXED _______------------------------------
+
+Pid pid_roll(1.5f, 0.01f, 0.5f ,servo_minout, servo_maxout);
+Pid pid_pitch(1.8f, 0.02f, 0.6f,servo_minout, servo_maxout);
+ActuatorMixer mixer(servo_minout, servo_maxout,motor_minout,motor_maxout);
 
 RCState currentState;
-
+PIDOuts pidCommands;
 
 void App_Main_Start(void)
 {
@@ -81,22 +90,28 @@ if(!scan){
     mpu_6050.angleMeasurement();
     MPU_DATA data = mpu_6050.getData();
 
+    float dt=0.004f;//osDelay(4)->0.004f
+
     currentState=System_GetState();
 
 
-    float servo_roll_out=pid_roll.compute(currentState.roll, data.roll, 0.004f); //osDelay(4)->0.004f
-    float servo_pitch_out= pid_pitch.compute(currentState.pitch, data.pitch, 0.004f);
+    pidCommands.servo_roll_out = pid_roll.compute(currentState.roll, data.roll, dt);
+    pidCommands.servo_pitch_out= pid_pitch.compute(currentState.pitch, data.pitch, dt);
 
-
+    mixer.compute(currentState, pidCommands);
+    ActuatorState_t pwm_outputs = mixer.getState();
 
     //this messages keeps processor bussy a lot . These are cancelled.
     //printf("X: %.2f | Y: %.2f | Z: %.2f | Total: %.2f\r\n",data.AccX, data.AccY, data.AccZ, data.totalforce);
     //printf("Gyro: X:%.1f Y:%.1f Z:%.1f\r\n",data.gyX, data.gyY, data.gyZ);
 
     //For now Im using a plain printf with a standard UART baud rate of 115200. It keeps the processor busy for about 2.5ms per message. With an osdelay of 4ms, there's still enough time for processing. Im skipping DMA usage for now I'll come back to work on it.
-    printf("R:%.1f -> PID:%.1f | P:%.1f -> PID:%.1f\r\n",
-                   data.roll, servo_roll_out,
-                   data.pitch, servo_pitch_out);
+    printf("AIL1:%u | AIL2:%u | ELEV:%u | MOT:%u\r\n",
+               pwm_ciktilari.aileron1_pwm,
+               pwm_ciktilari.aileron2_pwm,
+               pwm_ciktilari.elevator_pwm,
+               pwm_ciktilari.motor_pwm);
 
 
 }
+

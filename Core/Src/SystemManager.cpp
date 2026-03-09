@@ -14,7 +14,7 @@
 // Gerekli yerler deftere not alındı kontrol et
 
 
-static RCState rcCommands;add
+static RCState rcCommands;
 static osMutexId_t key_1;
 
 static const osMutexAttr_t sysStateMutex_attributes = {

@@ -25,7 +25,10 @@ private:
 
     bool _isDataValid;
 	bool validateChecksum();
+	float mapToFloat(uint16_t value, float out_min, float out_max);
 
+	float _out_max;
+	float _out_min;
 };
 
 

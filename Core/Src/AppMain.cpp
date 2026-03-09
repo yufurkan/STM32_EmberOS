@@ -15,9 +15,11 @@
 #include "Pid.h"
 #include "SystemManager.h"
 #include "Mixer.h"
+#include "IbusReader.h"
 
 extern I2C_HandleTypeDef hi2c1;// for line of ImuSensor mpu_6050(&hi2c1);
 extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart6;//using for fs ia6b reciver line
 
 StatusLed led1(LD2_GPIO_Port, LD2_Pin);
 ImuSensor mpu_6050(&hi2c1);
@@ -36,53 +38,50 @@ ActuatorMixer mixer(servo_minout, servo_maxout,motor_minout,motor_maxout);
 
 RCState currentState;
 PIDOuts pidCommands;
+IbusReader ibus;
+
+
 
 void App_Main_Start(void)
 {
+	System_Init();
 
+	//I will transfer into fuct later----
+	//dummy commands erased. uart6 dma way is open
+	//------------------------------------
+
+	if(mpu_6050.init()) {
+		printf("MPU6050 OK! Veri akisi basliyor...\r\n");
+	} else {
+		printf("MPU6050 BULUNAMADI! Kablolari kontrol et.\r\n");
+		HAL_Delay(500);
+
+	}
+
+	// uart6 DMA start command----------
+
+	HAL_UART_Receive_DMA(&huart6, ibus.rx_buffer, 32);
+
+	//----------------------------------
 }
 
 
 
 void App_Led_Task(void)
 {
-	led1.toggle();
+	if(currentState.armed)led1.on();
+	else led1.toggle();
 }
 
 void App_Sensor_Task(void)
 {
 
-//Im gonna seprate this part another function and call in main.c befere for loop include scan control--------------
-static bool scan=false;
-static bool isInitialized = false;
+	static bool scan=false;
 
-    if (!isInitialized) {
-    	System_Init();
-
-    	//I will transfer into fuct later----
-    	RCState dummyCommand;
-		dummyCommand.roll = 0.0f;
-		dummyCommand.yaw = 0.0f;
-		dummyCommand.pitch = 0.0f;
-		dummyCommand.throttle = 0.0f;
-		dummyCommand.armed = true;
-    	System_SetRCCommands(dummyCommand);
-		//------------------------------------
-
-        if(mpu_6050.init()) {
-            printf("MPU6050 OK! Veri akisi basliyor...\r\n");
-            isInitialized = true;
-        } else {
-            printf("MPU6050 BULUNAMADI! Kablolari kontrol et.\r\n");
-            osDelay(1000); // Hata varsa 1 saniye bekle tekrar dene
-            return;        // Fonksiyondan çık
-        }
-    }
-//---------------------------
-if(!scan){
-	scan=true;
-	I2C_Scanner_Baslat(&hi2c1, &huart2, (char*)"I2C1 HATTI");
-}
+	if(!scan){
+		scan=true;
+		I2C_Scanner_Baslat(&hi2c1, &huart2, (char*)"I2C1 HATTI");
+	}
 
 
     mpu_6050.readAccel();
@@ -113,5 +112,21 @@ if(!scan){
 			pwm_outputs.motor_pwm);
 
 
+}
+
+
+
+// huart6 DMA INterrupt !!
+extern "C" void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+
+	//checking is it uart6
+    if (huart->Instance == USART6) {
+
+        ibus.parse();
+        RCState pilotCommands = ibus.getRCState();
+
+        // Write to the rcCommands with Mutex/Critical Section protected function
+        System_SetRCCommands(pilotCommands);
+    }
 }
 

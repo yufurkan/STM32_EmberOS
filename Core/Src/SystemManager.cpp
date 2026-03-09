@@ -34,11 +34,16 @@ void System_Init(void)
 void System_SetRCCommands(RCState newCommands)
 {
 
+
+
+	taskENTER_CRITICAL();// stop  interrupts
+
 	if(osMutexAcquire(key_1,10== osOK)){
 		//I want to define the struct structure globally and replace the parameters using the struct.
 		rcCommands=newCommands;
 
 		osMutexRelease(key_1);
+		taskEXIT_CRITICAL();// open interrupts
 	}
 
 }

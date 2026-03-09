@@ -28,7 +28,8 @@ struct RCState{
 
 void System_Init(void); // Inıt
 void System_SetRCCommands( RCState newCommands);
-  RCState System_GetState(void);
+RCState System_GetState(void);
+
 
 
 

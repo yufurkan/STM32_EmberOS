@@ -484,6 +484,7 @@ int _write(int file, char *ptr, int len)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+
   /* Infinite loop */
   for(;;)
   {
@@ -504,6 +505,7 @@ void StartDefaultTask(void *argument)
 void StartSensorTask(void *argument)
 {
   /* USER CODE BEGIN StartSensorTask */
+
   /* Infinite loop */
   for(;;)
   {

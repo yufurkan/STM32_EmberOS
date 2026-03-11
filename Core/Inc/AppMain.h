@@ -8,14 +8,16 @@
 
 #ifndef INC_APPMAIN_H_
 #define INC_APPMAIN_H_
-
+#include "main.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+void App_Main_Start(void);
 void App_Led_Task(void);
-void App_Main_Start(void);// ana fonksiyon
+void App_Main_Start(void);
 void App_Sensor_Task(void);
+
 
 #ifdef __cplusplus
 }

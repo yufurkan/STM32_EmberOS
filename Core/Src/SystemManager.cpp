@@ -11,7 +11,7 @@
 #include "SystemManager.h"
 #include "cmsis_os.h"
 
-// Gerekli yerler deftere not alındı kontrol et
+// Gerekli yerler deftere not alındı kontrol et taskENTER_CRITICAL()
 
 
 static RCState rcCommands;
@@ -21,13 +21,14 @@ static const osMutexAttr_t sysStateMutex_attributes = {
   .name = "sysStateMutex"
 };
 
+// ATTENTİON: I remove the mutex using and start useing Critical Sections.
 
 // --- Start Func INIT ---
 void System_Init(void)
 {
-	key_1 =osMutexNew(NULL);
+	//key_1 =osMutexNew(NULL);
 
-	if(key_1==NULL)return;
+	//if(key_1==NULL)return;
 }
 
 // Safety Write
@@ -35,28 +36,24 @@ void System_SetRCCommands(RCState newCommands)
 {
 
 
-
 	taskENTER_CRITICAL();// stop  interrupts
-
-	if(osMutexAcquire(key_1,10== osOK)){
 		//I want to define the struct structure globally and replace the parameters using the struct.
-		rcCommands=newCommands;
+	rcCommands=newCommands;
 
-		osMutexRelease(key_1);
-		taskEXIT_CRITICAL();// open interrupts
-	}
+	taskEXIT_CRITICAL();// open interrupts
+
 
 }
 
 RCState System_GetState(void)
 {
-	RCState copyValue = {0};
+	RCState copyValue;
 
-	if(osMutexAcquire(key_1,10)){
+	    taskENTER_CRITICAL();
 
-		copyValue = rcCommands;
-		osMutexRelease(key_1);
-	}
+	    copyValue = rcCommands;
 
-	return copyValue;
+	    taskEXIT_CRITICAL();
+
+	    return copyValue;
 }

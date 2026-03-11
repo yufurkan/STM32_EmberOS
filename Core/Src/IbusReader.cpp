@@ -8,6 +8,7 @@
 
 
 #include "IbusReader.h"
+#include <string.h>
 
 IbusReader::IbusReader(){
 	_isDataValid = false;
@@ -23,43 +24,52 @@ IbusReader::IbusReader(){
 	_out_min=-20.0f;
 }
 
-bool IbusReader::validateChecksum() {
+bool IbusReader::validateChecksum(uint8_t* pkt){
 	uint16_t checksum = 0xFFFF;
 
 	for (int i = 0; i < 30; i++) {
-		checksum -= rx_buffer[i];
+		checksum -= pkt[i];
 	}
 
-	uint16_t checksum2 = (rx_buffer[31]<<8) | rx_buffer[30];
+	uint16_t rxsum  = (pkt[31]<<8) | pkt[30];
 
-	if(checksum2==checksum)return true; else return false;
+    return (checksum==rxsum);
 }
 
-void IbusReader::parse() {
-	// The packet must start with 0x20 (Length) and continue with 0x40 (Command)
-	if (rx_buffer[0] == 0x20 && rx_buffer[1] == 0x40) {
 
-		if (validateChecksum()) {
-			_isDataValid = true;
+void IbusReader::update(uint8_t* buffer){
 
-			for(int i=0; i<14;i++){
-				int index = 2 + (i * 2);
-				_channels[i] = (rx_buffer[index+1]<<8)|(rx_buffer[index]);
-			}
+    // search packet header inside dma buffer
+	for(int i = 0; i <= IBUS_DMA_BUFFER - IBUS_PACKET_SIZE; i++)
+	{
+	    if(buffer[i] == 0x20 && buffer[i+1] == 0x40)
+	    {
+	        uint8_t pkt[IBUS_PACKET_SIZE];
+	        memcpy(pkt, &buffer[i], IBUS_PACKET_SIZE);
 
-		} else {
-			_isDataValid = false;
-		}
-	} else {
-		_isDataValid = false;
+	        if(validateChecksum(pkt))
+	        {
+	            _isDataValid = true;
+
+	            for(int ch=0; ch<14; ch++)
+	            {
+	                int idx = 2 + ch*2;
+	                _channels[ch] = pkt[idx] | (pkt[idx+1]<<8);
+	            }
+
+	            return;
+	        }
+	    }
 	}
 }
+
+
 
 float IbusReader::mapToFloat(uint16_t value, float out_min, float out_max) {
 
 
-	if (value < 1000) value = 1000;
-	if (value > 2000) value = 2000;
+    if(value<1000) value=1000;
+    if(value>2000) value=2000;
 
 	// Linear Mapping
 	float mapped = ((float)(value - 1000) / 1000.0f) * (out_max - out_min) + out_min;
@@ -72,6 +82,16 @@ RCState IbusReader::getRCState() {
 	// This option is on hold for now; I'll consider it later.
 
 	RCState state;
+
+	if(!_isDataValid)
+	{
+		state.armed=false;
+		state.roll=0;
+		state.pitch=0;
+		state.yaw=0;
+		state.throttle=0;
+		return state;
+	}
 
 	if(_channels[4]>1500){
 		state.armed = true; //armed state CH5

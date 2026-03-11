@@ -21,16 +21,20 @@ extern I2C_HandleTypeDef hi2c1;// for line of ImuSensor mpu_6050(&hi2c1);
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart6;//using for fs ia6b reciver line
 
+
+#define IBUS_DMA_BUFFER 64
+
+
 StatusLed led1(LD2_GPIO_Port, LD2_Pin);
 ImuSensor mpu_6050(&hi2c1);
 
 float servo_minout= -20.0f;
 float servo_maxout=  20.0f;
 
-//FİXED _______(I will return here DANGER)-----
+
 float motor_minout= 0.0f;
 float motor_maxout= 100.0f;
-//FİXED _______------------------------------
+
 
 Pid pid_roll(1.5f, 0.01f, 0.5f ,servo_minout, servo_maxout);
 Pid pid_pitch(1.8f, 0.02f, 0.6f,servo_minout, servo_maxout);
@@ -40,7 +44,7 @@ RCState currentState;
 PIDOuts pidCommands;
 IbusReader ibus;
 
-
+uint8_t ibus_dma_buffer[IBUS_DMA_BUFFER];
 
 void App_Main_Start(void)
 {
@@ -60,7 +64,7 @@ void App_Main_Start(void)
 
 	// uart6 DMA start command----------
 
-	HAL_UART_Receive_DMA(&huart6, ibus.rx_buffer, 32);
+	HAL_UART_Receive_DMA(&huart6, ibus_dma_buffer, IBUS_DMA_BUFFER);
 
 	//----------------------------------
 }
@@ -69,7 +73,8 @@ void App_Main_Start(void)
 
 void App_Led_Task(void)
 {
-	if(currentState.armed)led1.on();
+	RCState state = System_GetState();  // read safely
+	if(state.armed) led1.on();
 	else led1.toggle();
 }
 
@@ -82,6 +87,14 @@ void App_Sensor_Task(void)
 		scan=true;
 		I2C_Scanner_Baslat(&hi2c1, &huart2, (char*)"I2C1 HATTI");
 	}
+
+	// update receiver
+	ibus.update(ibus_dma_buffer);
+
+	RCState pilot = ibus.getRCState();
+
+	System_SetRCCommands(pilot);
+
 
 
     mpu_6050.readAccel();
@@ -100,33 +113,10 @@ void App_Sensor_Task(void)
     mixer.compute(currentState, pidCommands);
     ActuatorState_t pwm_outputs = mixer.getState();
 
-    //this messages keeps processor bussy a lot . These are cancelled.
-    //printf("X: %.2f | Y: %.2f | Z: %.2f | Total: %.2f\r\n",data.AccX, data.AccY, data.AccZ, data.totalforce);
-    //printf("Gyro: X:%.1f Y:%.1f Z:%.1f\r\n",data.gyX, data.gyY, data.gyZ);
-
-    //For now Im using a plain printf with a standard UART baud rate of 115200. It keeps the processor busy for about 2.5ms per message. With an osdelay of 4ms, there's still enough time for processing. Im skipping DMA usage for now I'll come back to work on it.
-    printf("AIL1:%u | AIL2:%u | ELEV:%u | MOT:%u\r\n",
-    		pwm_outputs.aileron1_pwm,
-			pwm_outputs.aileron2_pwm,
-			pwm_outputs.elevator_pwm,
-			pwm_outputs.motor_pwm);
+   //now pritf functions keeping the system so busy. I decided to setup dma pipelinde for printf uart comminication for only debugging
 
 
 }
 
 
-
-// huart6 DMA INterrupt !!
-extern "C" void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-
-	//checking is it uart6
-    if (huart->Instance == USART6) {
-
-        ibus.parse();
-        RCState pilotCommands = ibus.getRCState();
-
-        // Write to the rcCommands with Mutex/Critical Section protected function
-        System_SetRCCommands(pilotCommands);
-    }
-}
 

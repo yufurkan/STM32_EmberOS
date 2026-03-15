@@ -43,7 +43,7 @@ bool ImuSensor::init() {
 	return 0;
 }
 
-void ImuSensor::angleMeasurement(){
+void ImuSensor::angleMeasurement(float heading){
 
 
 	_dt=(HAL_GetTick()-_prevTime)/1000.0;
@@ -60,6 +60,7 @@ void ImuSensor::angleMeasurement(){
 
 	mpu_data.roll = _alpha * (mpu_data.roll + mpu_data.gyX * _dt) + (1.0f - _alpha) * AccRoll;
 	mpu_data.pitch= _alpha * (mpu_data.pitch+ mpu_data.gyY * _dt) + (1.0f - _alpha) * AccPitch;
+	mpu_data.yaw  = _alpha * (mpu_data.yaw+ mpu_data.gyZ * _dt)   + (1.0f - _alpha) * heading;
 
 
 	_prevTime=HAL_GetTick();

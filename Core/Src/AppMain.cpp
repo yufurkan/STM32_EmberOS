@@ -16,6 +16,7 @@
 #include "SystemManager.h"
 #include "Mixer.h"
 #include "IbusReader.h"
+#include "Compass.h"
 
 extern I2C_HandleTypeDef hi2c1;// for line of ImuSensor mpu_6050(&hi2c1);
 extern UART_HandleTypeDef huart2;
@@ -27,6 +28,8 @@ extern UART_HandleTypeDef huart6;//using for fs ia6b reciver line
 
 StatusLed led1(LD2_GPIO_Port, LD2_Pin);
 ImuSensor mpu_6050(&hi2c1);
+Compass compass(&hi2c1);
+
 
 float servo_minout= -20.0f;
 float servo_maxout=  20.0f;
@@ -38,17 +41,21 @@ float motor_maxout= 100.0f;
 
 Pid pid_roll(1.5f, 0.01f, 0.5f ,servo_minout, servo_maxout);
 Pid pid_pitch(1.8f, 0.02f, 0.6f,servo_minout, servo_maxout);
+Pid pid_yaw(1.8f, 0.02f, 0.6f,servo_minout, servo_maxout);
+
 ActuatorMixer mixer(servo_minout, servo_maxout,motor_minout,motor_maxout);
 
 RCState currentState;
 PIDOuts pidCommands;
 IbusReader ibus;
 
+
 uint8_t ibus_dma_buffer[IBUS_DMA_BUFFER];
 
 void App_Main_Start(void)
 {
 	System_Init();
+	compass.init();
 
 	//I will transfer into fuct later----
 	//dummy commands erased. uart6 dma way is open
@@ -99,7 +106,8 @@ void App_Sensor_Task(void)
 
     mpu_6050.readAccel();
     mpu_6050.readGyro();
-    mpu_6050.angleMeasurement();
+    compass.read();
+    mpu_6050.angleMeasurement(compass.getYaw());
     MPU_DATA data = mpu_6050.getData();
 
     float dt=0.004f;//osDelay(4)->0.004f
@@ -109,6 +117,8 @@ void App_Sensor_Task(void)
 
     pidCommands.servo_roll_out = pid_roll.compute(currentState.roll, data.roll, dt);
     pidCommands.servo_pitch_out= pid_pitch.compute(currentState.pitch, data.pitch, dt);
+    pidCommands.servo_yaw_out= pid_yaw.compute(currentState.yaw, data.yaw, dt);
+
 
     mixer.compute(currentState, pidCommands);
     ActuatorState_t pwm_outputs = mixer.getState();

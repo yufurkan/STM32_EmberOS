@@ -38,6 +38,8 @@ float motor_maxout= 100.0f;
 
 Pid pid_roll(1.5f, 0.01f, 0.5f ,servo_minout, servo_maxout);
 Pid pid_pitch(1.8f, 0.02f, 0.6f,servo_minout, servo_maxout);
+Pid pid_yaw(2.0f, 0.0f, 0.1f, servo_minout, servo_maxout);
+
 ActuatorMixer mixer(servo_minout, servo_maxout,motor_minout,motor_maxout);
 
 RCState currentState;
@@ -109,6 +111,7 @@ void App_Sensor_Task(void)
 
     pidCommands.servo_roll_out = pid_roll.compute(currentState.roll, data.roll, dt);
     pidCommands.servo_pitch_out= pid_pitch.compute(currentState.pitch, data.pitch, dt);
+    pidCommands.servo_yaw_out=pid_yaw.compute(currentState.yaw, data.yaw, dt);
 
     mixer.compute(currentState, pidCommands);
     ActuatorState_t pwm_outputs = mixer.getState();

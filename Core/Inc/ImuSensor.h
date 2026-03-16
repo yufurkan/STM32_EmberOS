@@ -40,7 +40,7 @@ public:
 	void readAccel();
 	void readGyro();
 	MPU_DATA getData();
-	void angleMeasurement();
+	void angleMeasurement(float heading);
 
 private:
 

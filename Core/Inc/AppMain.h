@@ -17,7 +17,7 @@ void App_Main_Start(void);
 void App_Led_Task(void);
 void App_Main_Start(void);
 void App_Sensor_Task(void);
-
+void App_Telemetry_Task(void *argument);
 
 #ifdef __cplusplus
 }

@@ -31,7 +31,7 @@ uint16_t ActuatorMixer::mapToPWM(float value, float in_min, float in_max, uint16
 }
 
 
-void ActuatorMixer::compute( RCState infos, PIDOuts pid_infos){
+void ActuatorMixer::compute(const RCState& infos, const PIDOuts& pid_infos){
 
 
 	if(infos.armed){

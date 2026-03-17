@@ -32,7 +32,7 @@ class ActuatorMixer{
 
 		uint16_t mapToPWM(float value, float in_min, float in_max, uint16_t out_min, uint16_t out_max);
 
-		void compute( RCState infos, PIDOuts pid_infos);
+		void compute(const RCState& infos,const PIDOuts& pid_infos);
 
 		ActuatorState_t getState();
 

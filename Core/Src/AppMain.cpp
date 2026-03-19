@@ -17,10 +17,14 @@
 #include "Mixer.h"
 #include "IbusReader.h"
 #include "Compass.h"
+#include "TelemetryMenager.h"
+#include "cmsis_os.h"
+
 
 extern I2C_HandleTypeDef hi2c1;// for line of ImuSensor mpu_6050(&hi2c1);
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart6;//using for fs ia6b reciver line
+
 
 
 #define IBUS_DMA_BUFFER 64
@@ -29,6 +33,7 @@ extern UART_HandleTypeDef huart6;//using for fs ia6b reciver line
 StatusLed led1(LD2_GPIO_Port, LD2_Pin);
 ImuSensor mpu_6050(&hi2c1);
 Compass compass(&hi2c1);
+TelemetryMenager telemetry(&huart2);
 
 
 float servo_minout= -20.0f;
@@ -49,6 +54,9 @@ RCState currentState;
 PIDOuts pidCommands;
 IbusReader ibus;
 
+//Queue
+osMessageQueueId_t telemetryQueue;
+
 
 uint8_t ibus_dma_buffer[IBUS_DMA_BUFFER];
 
@@ -57,16 +65,24 @@ void App_Main_Start(void)
 	System_Init();
 	compass.init();
 
-	//I will transfer into fuct later----
-	//dummy commands erased. uart6 dma way is open
-	//------------------------------------
+	// create the telemetry queue
+	telemetryQueue = osMessageQueueNew(1, sizeof(ActuatorState_t), NULL);
+
+	// create the Telemetry Task ----------
+	const osThreadAttr_t telemetry_attr = {
+	  .name = "TelemetryTask",
+	  .stack_size = 256 * 4, // 1024 byte RAM
+	  .priority = (osPriority_t) osPriorityNormal,
+	};
+	osThreadNew(App_Telemetry_Task, NULL, &telemetry_attr);
+	//---------------------------------
+
 
 	if(mpu_6050.init()) {
-		printf("MPU6050 OK! Veri akisi basliyor...\r\n");
+		printf("MPU6050 OK!\r\n");
 	} else {
-		printf("MPU6050 BULUNAMADI! Kablolari kontrol et.\r\n");
+		printf("MPU6050 NOT FOUND! Check the cables.\r\n");
 		HAL_Delay(500);
-
 	}
 
 	// uart6 DMA start command----------
@@ -121,7 +137,19 @@ void App_Sensor_Task(void)
 
 
     mixer.compute(currentState, pidCommands);
+
     ActuatorState_t pwm_outputs = mixer.getState();
+
+
+    // it wakes telemetry task
+    static uint8_t telemetry_counter = 0;
+    telemetry_counter++;
+	if (telemetry_counter >= 5)
+	{
+		osMessageQueuePut(telemetryQueue, &pwm_outputs, 0, 0);
+		telemetry_counter = 0;
+	}
+
 
    //now pritf functions keeping the system so busy. I decided to setup dma pipelinde for printf uart comminication for only debugging
 
@@ -129,4 +157,19 @@ void App_Sensor_Task(void)
 }
 
 
+void App_Telemetry_Task(void *argument){
 
+	ActuatorState_t received_data;
+
+	while(1)
+	{
+		// If there is no data in the queue, do not burden the processor sleep forever (osWaitForever)
+		// RTOS wakes up this cycle when App_Sensor_Task puts data into
+		if (osMessageQueueGet(telemetryQueue, &received_data, NULL, osWaitForever) == osOK)
+		{
+			// The data has arrived
+			telemetry.pckData(received_data);
+			telemetry.send();
+		}
+	}
+}

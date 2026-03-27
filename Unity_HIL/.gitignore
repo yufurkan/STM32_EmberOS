@@ -9,3 +9,14 @@
 *.csproj
 *.sln
 *.userprefs
+
+
+
+[Uu]ser[Ss]ettings/
+*.rar
+*.zip
+*.7z
+*.mp4
+*.pdf
+.vs/
+.idea/

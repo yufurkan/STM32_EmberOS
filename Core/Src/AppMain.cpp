@@ -131,9 +131,14 @@ void App_Sensor_Task(void)
     currentState=System_GetState();
 
 
-    pidCommands.servo_roll_out = pid_roll.compute(currentState.roll, data.roll, dt);
-    pidCommands.servo_pitch_out= pid_pitch.compute(currentState.pitch, data.pitch, dt);
-    pidCommands.servo_yaw_out= pid_yaw.compute(currentState.yaw, data.yaw, dt);
+    //pidCommands.servo_roll_out = pid_roll.compute(currentState.roll, data.roll, dt);
+    //pidCommands.servo_pitch_out= pid_pitch.compute(currentState.pitch, data.pitch, dt);
+    //pidCommands.servo_yaw_out= pid_yaw.compute(currentState.yaw, data.yaw, dt);
+
+    // Transfer the control code to the mixer directly.(test)
+    pidCommands.servo_roll_out = currentState.roll;
+	pidCommands.servo_pitch_out = currentState.pitch;
+	pidCommands.servo_yaw_out = currentState.yaw;
 
 
     mixer.compute(currentState, pidCommands);

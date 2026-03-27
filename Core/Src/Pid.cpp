@@ -13,7 +13,7 @@ Pid::Pid(float kp, float ki, float kd, float minOut, float maxOut) {
 
 // Updating Coefficients
 void Pid::setTunings(float kp, float ki, float kd) {
-    if (kp < 0 || ki < 0 || kd < 0) return; // Negatif katsayı olmaz
+    if (kp < 0 || ki < 0 || kd < 0) return;
     _kp = kp;
     _ki = ki;
     _kd = kd;

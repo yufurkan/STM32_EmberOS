@@ -20,16 +20,39 @@ public class TelemetryDecoder : MonoBehaviour
     public short aux1; // ch5, flight mode
     public short aileron2;
 
+    [Header("Airplane 3D Models")]
+    public Transform rightAileronTransform;
+    public Transform leftAileronTransform;
+    public Transform elevatorTransform;
+    public Transform rudderTransform;
+
+    private Quaternion startRightAileron;
+    private Quaternion startLeftAileron;
+    private Quaternion startElevator;
+    private Quaternion startRudder;
+
+    [Header("Max Angles")]
+    public float maxAngle = 30f;
+
+    [Header("Propeller")]
+    public Transform propellerTransform;
+    public float maxRPM = 12100f; // 550KV * 22V
+
     private SerialPort serialPort;
     private List<byte> buffer = new List<byte>();
 
     // Update is called once per frame
     void Start()
     {
+        if (rightAileronTransform != null) startRightAileron = rightAileronTransform.localRotation;
+        if (leftAileronTransform != null) startLeftAileron = leftAileronTransform.localRotation;
+        if (elevatorTransform != null) startElevator = elevatorTransform.localRotation;
+        if (rudderTransform != null) startRudder = rudderTransform.localRotation;
+
         try
         {
             serialPort = new SerialPort(portName, baudRate);
-            serialPort.ReadTimeout = 10; // Small timeout to prevent Unity from freezing
+            serialPort.ReadTimeout = 10;
             serialPort.Open();
             Debug.Log($"[HIL] Successfully opened port {portName}.");
         }
@@ -41,20 +64,46 @@ public class TelemetryDecoder : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Update()
     {
-    
         if (serialPort == null || !serialPort.IsOpen) return;
 
-        // Check if there is new data in the serial buffer
         if (serialPort.BytesToRead > 0)
         {
             byte[] incoming = new byte[serialPort.BytesToRead];
             serialPort.Read(incoming, 0, incoming.Length);
-
-            // Append the incoming bytes 
-            buffer.AddRange(incoming);
-
-          
+            buffer.AddRange(incoming); 
             ProcessBuffer();
+        }
+
+        float aileronAngle = Map(aileron, 1000, 2000, -maxAngle, maxAngle);
+        float elevatorAngle = Map(elevator, 1000, 2000, -maxAngle, maxAngle);
+        float rudderAngle = Map(rudder, 1000, 2000, -maxAngle, maxAngle);
+
+        // Önce sadece Z eksenini test et
+        if (rightAileronTransform != null)
+            rightAileronTransform.localRotation = startRightAileron * Quaternion.Euler(aileronAngle, 0, 0);
+
+        if (leftAileronTransform != null)
+            leftAileronTransform.localRotation = startLeftAileron * Quaternion.Euler(aileronAngle, 0, 0);
+
+        if (elevatorTransform != null)
+            elevatorTransform.localRotation = startElevator * Quaternion.Euler(elevatorAngle, 0, 0);
+
+        if (rudderTransform != null)
+            rudderTransform.localRotation = startRudder * Quaternion.Euler(0, rudderAngle, 0);
+
+
+        
+        float throttlePercent = Mathf.Clamp01(Map(throttle, 1000, 2000, 0f, 1f));
+
+      
+        float currentRPM = throttlePercent * maxRPM;
+
+      
+        float rotationSpeed = currentRPM * 6f;
+
+        if (propellerTransform != null)
+        {
+            propellerTransform.Rotate(0, 0, rotationSpeed * Time.deltaTime);
         }
     }
 
@@ -117,6 +166,11 @@ public class TelemetryDecoder : MonoBehaviour
             serialPort.Close();
             Debug.Log("[HIL] Port closed.");
         }
+    }
+
+    float Map(float x, float in_min, float in_max, float out_min, float out_max)
+    {
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
 

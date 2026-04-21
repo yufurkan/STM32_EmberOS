@@ -5,9 +5,6 @@ using UnityEngine;
 
 public class TelemetryDecoder : MonoBehaviour
 {
-    
- 
-
     [Header("Port Settings")]
     public string portName = "COM6";
     public int baudRate = 115200;
@@ -17,8 +14,14 @@ public class TelemetryDecoder : MonoBehaviour
     public short elevator;
     public short throttle;
     public short rudder;
-    public short aux1; // ch5, flight mode
+    public short aux1;
     public short aileron2;
+
+    [Header("Physics Surfaces")]
+    public AeroSurface rightWingAero;
+    public AeroSurface leftWingAero;
+    public AeroSurface elevatorAero;
+    public AeroSurface rudderAero;
 
     [Header("Airplane 3D Models")]
     public Transform rightAileronTransform;
@@ -36,12 +39,11 @@ public class TelemetryDecoder : MonoBehaviour
 
     [Header("Propeller")]
     public Transform propellerTransform;
-    public float maxRPM = 12100f; // 550KV * 22V
+    public float maxRPM = 12100f;
 
     private SerialPort serialPort;
     private List<byte> buffer = new List<byte>();
 
-    // Update is called once per frame
     void Start()
     {
         if (rightAileronTransform != null) startRightAileron = rightAileronTransform.localRotation;
@@ -61,7 +63,7 @@ public class TelemetryDecoder : MonoBehaviour
             Debug.LogError($"[HIL] Port Error: {e.Message}");
         }
     }
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
     void Update()
     {
         if (serialPort == null || !serialPort.IsOpen) return;
@@ -70,7 +72,7 @@ public class TelemetryDecoder : MonoBehaviour
         {
             byte[] incoming = new byte[serialPort.BytesToRead];
             serialPort.Read(incoming, 0, incoming.Length);
-            buffer.AddRange(incoming); 
+            buffer.AddRange(incoming);
             ProcessBuffer();
         }
 
@@ -78,12 +80,19 @@ public class TelemetryDecoder : MonoBehaviour
         float elevatorAngle = Map(elevator, 1000, 2000, -maxAngle, maxAngle);
         float rudderAngle = Map(rudder, 1000, 2000, -maxAngle, maxAngle);
 
-        // Önce sadece Z eksenini test et
+        // Pass calculated angles directly to physics scripts
+        //if (rightWingAero != null) rightWingAero.controlSurfaceDeflectionAngle = aileronAngle;
+        //if (leftWingAero != null) leftWingAero.controlSurfaceDeflectionAngle = -aileronAngle;
+        //if (elevatorAero != null) elevatorAero.controlSurfaceDeflectionAngle = elevatorAngle;
+        //if (rudderAero != null) rudderAero.controlSurfaceDeflectionAngle = rudderAngle;
+
+        // Visual model rotations
         if (rightAileronTransform != null)
             rightAileronTransform.localRotation = startRightAileron * Quaternion.Euler(aileronAngle, 0, 0);
 
+        // Left aileron inverted to prevent flap-like behavior
         if (leftAileronTransform != null)
-            leftAileronTransform.localRotation = startLeftAileron * Quaternion.Euler(aileronAngle, 0, 0);
+            leftAileronTransform.localRotation = startLeftAileron * Quaternion.Euler(-aileronAngle, 0, 0);
 
         if (elevatorTransform != null)
             elevatorTransform.localRotation = startElevator * Quaternion.Euler(elevatorAngle, 0, 0);
@@ -91,14 +100,8 @@ public class TelemetryDecoder : MonoBehaviour
         if (rudderTransform != null)
             rudderTransform.localRotation = startRudder * Quaternion.Euler(0, rudderAngle, 0);
 
-
-        
         float throttlePercent = Mathf.Clamp01(Map(throttle, 1000, 2000, 0f, 1f));
-
-      
         float currentRPM = throttlePercent * maxRPM;
-
-      
         float rotationSpeed = currentRPM * 6f;
 
         if (propellerTransform != null)
@@ -109,31 +112,22 @@ public class TelemetryDecoder : MonoBehaviour
 
     void ProcessBuffer()
     {
-
         while (buffer.Count >= 24)
         {
-
             if (buffer[0] == 0xAA && buffer[1] == 0xBB)
             {
-     
                 int calculatedChecksum = 0;
 
-        
                 for (int i = 0; i < 10; i++)
                 {
                     calculatedChecksum += BitConverter.ToInt16(buffer.ToArray(), 2 + (i * 2));
                 }
 
-    
                 calculatedChecksum &= 0xFFFF;
-
-                // Read the received checksum from the last 2 bytes of the packet
                 ushort receivedChecksum = BitConverter.ToUInt16(buffer.ToArray(), 22);
 
-        
                 if (calculatedChecksum == receivedChecksum)
                 {
-                    // Checksum matches
                     aileron = BitConverter.ToInt16(buffer.ToArray(), 2);
                     elevator = BitConverter.ToInt16(buffer.ToArray(), 4);
                     throttle = BitConverter.ToInt16(buffer.ToArray(), 6);
@@ -141,24 +135,20 @@ public class TelemetryDecoder : MonoBehaviour
                     aux1 = BitConverter.ToInt16(buffer.ToArray(), 10);
                     aileron2 = BitConverter.ToInt16(buffer.ToArray(), 12);
 
-                    // move to the next packet
                     buffer.RemoveRange(0, 24);
                 }
                 else
                 {
-                    // If checksum fails
                     buffer.RemoveAt(0);
                 }
             }
             else
             {
-                // If headers do not match
                 buffer.RemoveAt(0);
             }
         }
     }
 
-    // Extremely important: Release the port when Unity quits to avoid locking the COM port
     void OnApplicationQuit()
     {
         if (serialPort != null && serialPort.IsOpen)
@@ -172,6 +162,4 @@ public class TelemetryDecoder : MonoBehaviour
     {
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
-
-
 }

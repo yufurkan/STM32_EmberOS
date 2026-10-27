@@ -6,7 +6,7 @@ public class AircraftPhysics : MonoBehaviour
 {
     public Transform centerOfMass;
 
-    public float maxThrust = 40f;
+    public float maxThrust = 20f;
     [Range(0f, 1f)] public float throttle = 0f;
 
     public List<AeroSurface> aeroSurfaces;
@@ -21,6 +21,8 @@ public class AircraftPhysics : MonoBehaviour
         if (centerOfMass != null)
         {
             rb.centerOfMass = transform.InverseTransformPoint(centerOfMass.position);
+            rb.inertiaTensor = new Vector3(0.07f, 0.14f, 0.06f); // x=pitch, y=yaw, z=roll (kg·m²)
+            rb.inertiaTensorRotation = Quaternion.identity;
         }
     }
 

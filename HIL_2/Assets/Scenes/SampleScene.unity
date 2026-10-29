@@ -132,6 +132,8 @@ GameObject:
   - component: {fileID: 86412998}
   - component: {fileID: 86412999}
   - component: {fileID: 86413000}
+  - component: {fileID: 86413001}
+  - component: {fileID: 86413002}
   m_Layer: 0
   m_Name: 'AircraftRoot '
   m_TagString: Untagged
@@ -148,13 +150,13 @@ Transform:
   m_GameObject: {fileID: 86412994}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 2.333, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 606538107}
+  - {fileID: 330585546}
   - {fileID: 2124113286}
-  - {fileID: 1375458123}
+  - {fileID: 606538107}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &86412996
@@ -186,7 +188,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 86412994}
   serializedVersion: 5
-  m_Mass: 3.6
+  m_Mass: 2.1
   m_LinearDamping: 0
   m_AngularDamping: 2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -218,14 +220,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AircraftPhysics
   centerOfMass: {fileID: 2124113286}
-  maxThrust: 40
+  maxThrust: 20
   throttle: 0
   aeroSurfaces:
-  - {fileID: 636123691}
-  - {fileID: 261765236}
-  - {fileID: 1027214760}
-  - {fileID: 1175069170}
-  - {fileID: 1203151378}
+  - {fileID: 242592079}
+  - {fileID: 1927750556}
+  - {fileID: 681100601}
+  - {fileID: 596547088}
+  - {fileID: 851406602}
 --- !u!114 &86413000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,10 +250,10 @@ MonoBehaviour:
   aileron2: 0
   emaAlpha: 0.2
   aircraftPhysics: {fileID: 86412999}
-  rightAileronAero: {fileID: 261765236}
-  leftAileronAero: {fileID: 636123691}
-  elevatorAero: {fileID: 1175069170}
-  rudderAero: {fileID: 1027214760}
+  rightAileronAero: {fileID: 681100601}
+  leftAileronAero: {fileID: 1927750556}
+  elevatorAero: {fileID: 851406602}
+  rudderAero: {fileID: 596547088}
   rightAileronTransform: {fileID: 261765233}
   leftAileronTransform: {fileID: 636123688}
   elevatorTransform: {fileID: 1175069167}
@@ -259,6 +261,38 @@ MonoBehaviour:
   maxAngle: 30
   propellerTransform: {fileID: 227776887}
   maxRPM: 12100
+--- !u!114 &86413001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86412994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10155c0d305c6d245910c8a0c51951b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HilDiagnostics
+  showGizmos: 1
+  showLivePanel: 1
+  gizmoLength: 0.5
+  launchSpeed: 0
+--- !u!114 &86413002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 86412994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56f309e39cc44cd45af743284abcc14e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FlightLogger
+  recordSeconds: 15
+  consoleEvery: 0.5
+  startHeightBoost: 1
+  launchSpeed: 0
 --- !u!4 &227776887 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4327503609256500769, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
@@ -273,6 +307,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 242592078}
+  - component: {fileID: 242592079}
   m_Layer: 0
   m_Name: Main_Wing
   m_TagString: Untagged
@@ -289,12 +324,28 @@ Transform:
   m_GameObject: {fileID: 242592077}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.12, z: 0.024}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1375458123}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &242592079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 242592077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bbf004c1b9bcf042b60f3c2df359b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AeroSurface
+  config: {fileID: 11400000, guid: 76b62b43fd95e294bac151a13042aa30, type: 2}
+  chord: 0.251
+  span: 1.69
+  flapAngle: 0
 --- !u!1 &261765232 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -2361960778377783317, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
@@ -407,13 +458,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 118.04, y: 7.04, z: 152.16}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0.1833558, y: 0.0002962937, z: -0.00052020204, w: 0.9830465}
+  m_LocalPosition: {x: -1.1223252e-10, y: 1.6990001, z: -2.651}
+  m_LocalScale: {x: 632.9113, y: 632.91144, z: 632.9114}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 86412995}
+  m_LocalEulerAnglesHint: {x: 21.131, y: 0.024, z: -0.056}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -501,16 +552,28 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 4324e8dcac4fa6d41b2d943b8b1918a0, type: 2}
     - target: {fileID: -8679921383154817045, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 15.8
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 15.8
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 15.8
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 113.48
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.26717
+      value: 0.0336
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 169.45
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1055,6 +1118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 596547087}
+  - component: {fileID: 596547088}
   m_Layer: 0
   m_Name: Rudder
   m_TagString: Untagged
@@ -1070,13 +1134,29 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 596547086}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.127, z: -0.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1375458123}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!114 &596547088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 596547086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bbf004c1b9bcf042b60f3c2df359b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AeroSurface
+  config: {fileID: 11400000, guid: 02ff063ae8eb06e44b441324d8b5536e, type: 2}
+  chord: 0.2
+  span: 0.22
+  flapAngle: 0
 --- !u!1 &606538106 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
@@ -1165,6 +1245,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 261765233}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &681100599
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 681100600}
+  - component: {fileID: 681100601}
+  m_Layer: 0
+  m_Name: R_Aileron
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &681100600
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 681100599}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.53, y: 0.115, z: -0.13}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1375458123}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &681100601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 681100599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bbf004c1b9bcf042b60f3c2df359b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AeroSurface
+  config: {fileID: 11400000, guid: 02ff063ae8eb06e44b441324d8b5536e, type: 2}
+  chord: 0.061
+  span: 0.408
+  flapAngle: 0
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1249,6 +1377,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 851406601}
+  - component: {fileID: 851406602}
   m_Layer: 0
   m_Name: Elevator
   m_TagString: Untagged
@@ -1265,12 +1394,28 @@ Transform:
   m_GameObject: {fileID: 851406600}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.067, z: -0.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1375458123}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &851406602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 851406600}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bbf004c1b9bcf042b60f3c2df359b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AeroSurface
+  config: {fileID: 11400000, guid: 02ff063ae8eb06e44b441324d8b5536e, type: 2}
+  chord: 0.19
+  span: 0.45
+  flapAngle: 0
 --- !u!1 &1027214756 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -738270316869278921, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
@@ -1389,16 +1534,17 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1375458122}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 113.48, y: 1.26717, z: 169.79}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1927750555}
+  - {fileID: 681100600}
   - {fileID: 851406601}
   - {fileID: 596547087}
   - {fileID: 242592078}
-  m_Father: {fileID: 86412995}
+  m_Father: {fileID: 2124113286}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1927750554
 GameObject:
@@ -1409,8 +1555,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1927750555}
+  - component: {fileID: 1927750556}
   m_Layer: 0
-  m_Name: L01
+  m_Name: L_Aileron
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1425,12 +1572,28 @@ Transform:
   m_GameObject: {fileID: 1927750554}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.523, y: 0.115, z: -0.13}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1375458123}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1927750556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1927750554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bbf004c1b9bcf042b60f3c2df359b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AeroSurface
+  config: {fileID: 11400000, guid: 02ff063ae8eb06e44b441324d8b5536e, type: 2}
+  chord: 0.061
+  span: 0.408
+  flapAngle: 0
 --- !u!1 &1971044393 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -225605066951789683, guid: ace7a1759fdfb7745b1ba93424ed9990, type: 3}
@@ -1564,7 +1727,7 @@ Transform:
   m_GameObject: {fileID: 2018480577}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 120.82935, y: -4.64, z: 171.3195}
+  m_LocalPosition: {x: 0, y: 0.02632, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1594,11 +1757,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2124113285}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 113.488, y: 1.143, z: 167.649}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.0019, y: 0.021593094, z: -0.26860002}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1375458123}
   m_Father: {fileID: 86412995}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
@@ -1607,6 +1771,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 410087041}
   - {fileID: 832575519}
-  - {fileID: 330585546}
   - {fileID: 2018480581}
   - {fileID: 86412995}

@@ -7,6 +7,8 @@ Release/
 *.ioc.bak
 build/
 bin/
+FlightLogs/
+Unity_HIL/
 
 
 # Compiled Object files

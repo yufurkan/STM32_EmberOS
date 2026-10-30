@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab294503deb363a47bd82ae33715d170, type: 3}
   m_Name: Kontrol_Config
   m_EditorClassIdentifier: Assembly-CSharp::AeroConfig
-  liftSlope: 15
+  liftSlope: 4.5
   skinFriction: 0.02
   zeroLiftAoA: 0
   stallAngleHigh: 15
